@@ -3,6 +3,7 @@ package com.codinginflow.mvvmtodo.ui.tasks
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import com.codinginflow.mvvmtodo.data.SortOrder
 import com.codinginflow.mvvmtodo.data.TaskDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -41,6 +42,3 @@ class TasksViewModel @ViewModelInject constructor(
      // asLiveData is the latest value of the flow stream
     val tasks = tasksFlow.asLiveData()
 }
-
-// two distinct sorting states represented by single values
-enum class SortOrder {BY_NAME, BY_DATE}
