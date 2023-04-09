@@ -20,10 +20,11 @@ interface TaskDao {
         thread and can introduce "lag".
      */
 
-    @Query("SELECT * FROM task_table")
+    // % before and after lets us ":searchQuery" be at any location within task name
+    @Query("SELECT * FROM task_table WHERE name LIKE '%' || :searchQuery || '%' ORDER BY important DESC")
 
     // represents a stream of data, asynchronous stream data, continuously updated
-    fun getTasks(): Flow<List<Task>>
+    fun getTasks(searchQuery: String): Flow<List<Task>>
 
     //room generates @Insert code
     //REPLACE when trying to update a task with a conflicting ID
