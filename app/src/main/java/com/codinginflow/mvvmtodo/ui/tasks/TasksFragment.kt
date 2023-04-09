@@ -30,5 +30,11 @@ class TasksFragment : Fragment(R.layout.fragment_tasks) {
                 setHasFixedSize(true)
             }
         }
+        // trailing lambda
+        // recieve changes within the database here, and decide what to do
+        viewModel.tasks.observe(viewLifecycleOwner) {
+            // update adapter
+            taskAdapter.submitList(it)
+        }
     }
 }
