@@ -1,6 +1,7 @@
 package com.codinginflow.mvvmtodo.data
 
 import androidx.room.*
+import com.codinginflow.mvvmtodo.ui.tasks.SortOrder
 import kotlinx.coroutines.flow.Flow
 
 /*
@@ -20,11 +21,19 @@ interface TaskDao {
         thread and can introduce "lag".
      */
 
-    // % before and after lets us ":searchQuery" be at any location within task name
-    @Query("SELECT * FROM task_table WHERE name LIKE '%' || :searchQuery || '%' ORDER BY important DESC")
+    fun getTasks(query: String, sortOrder: SortOrder, hideCompleted: Boolean): Flow<List<Task>> =
+        when(sortOrder) {
+            SortOrder.BY_DATE -> getTasksSortedDateCreated(query, hideCompleted)
+            SortOrder.BY_NAME -> getTasksSortedByName(query, hideCompleted)
+        }
 
+    // % before and after lets us ":searchQuery" be at any location within task name
+    @Query("SELECT * FROM task_table WHERE (completed != :hideCompleted or completed = 0) AND name LIKE '%' || :searchQuery || '%' ORDER BY important DESC, name")
     // represents a stream of data, asynchronous stream data, continuously updated
-    fun getTasks(searchQuery: String): Flow<List<Task>>
+    fun getTasksSortedByName(searchQuery: String, hideCompleted: Boolean): Flow<List<Task>>
+
+    @Query("SELECT * FROM task_table WHERE (completed != :hideCompleted or completed = 0) AND name LIKE '%' || :searchQuery || '%' ORDER BY important DESC, date_in_millis")
+    fun getTasksSortedDateCreated(searchQuery: String, hideCompleted: Boolean): Flow<List<Task>>
 
     //room generates @Insert code
     //REPLACE when trying to update a task with a conflicting ID
