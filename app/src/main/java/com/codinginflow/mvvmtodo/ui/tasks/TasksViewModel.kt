@@ -6,6 +6,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.codinginflow.mvvmtodo.data.PreferencesManager
 import com.codinginflow.mvvmtodo.data.SortOrder
+import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.data.TaskDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -41,8 +42,10 @@ class TasksViewModel @ViewModelInject constructor(
     }.flatMapLatest {(query, preferences) ->
         taskDao.getTasks(query, preferences.sortOrder, preferences.hideCompleted)
     }
+    // asLiveData is the latest value of the flow stream
+    val tasks = tasksFlow.asLiveData()
 
-    // functionality for fragment to update values in preferences manager
+    // define functionalities on click/select
     fun onSortOrderSelected(sortOrder: SortOrder) = viewModelScope.launch {
         preferencesManager.updateSortOrder(sortOrder)
     }
@@ -51,6 +54,12 @@ class TasksViewModel @ViewModelInject constructor(
         preferencesManager.updateHideCompleted(hideCompleted)
     }
 
-    // asLiveData is the latest value of the flow stream
-    val tasks = tasksFlow.asLiveData()
+    fun onTaskSelected(task: Task) {}
+
+    fun onTaskCheckedChanged(task: Task, isChecked: Boolean) = viewModelScope.launch {
+        taskDao.update(task.copy(completed = isChecked))
+    }
+
+
+
 }

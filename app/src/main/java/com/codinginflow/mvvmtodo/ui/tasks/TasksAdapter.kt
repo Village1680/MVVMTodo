@@ -11,7 +11,7 @@ import com.codinginflow.mvvmtodo.databinding.ItemTaskBinding
 
 // use ListAdapter when you have reactive data source, because it always recieves a completely new list
 // and updates the changes from the old and new list
-class TasksAdapter : ListAdapter<Task, TasksAdapter.TasksViewHolder>(DiffCallback()) {
+class TasksAdapter(private val listener: OnItemClickListener) : ListAdapter<Task, TasksAdapter.TasksViewHolder>(DiffCallback()) {
 
     // creates new item in list
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TasksViewHolder {
@@ -29,7 +29,26 @@ class TasksAdapter : ListAdapter<Task, TasksAdapter.TasksViewHolder>(DiffCallbac
 
     // knows where the views in our layouts are utilising viewbinding
     // nested class for TasksAdapter
-    class TasksViewHolder(private val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class TasksViewHolder(private val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
+        init { // init block only called when viewholder is instantiated
+            binding.apply {
+                root.setOnClickListener {
+                    val position = adapterPosition
+                    // incase click item that is animating and deleting but not valid anymore
+                    if (position != RecyclerView.NO_POSITION) {
+                        val task = getItem(position)
+                        listener.onItemClick(task)
+                    }
+                }
+                checkBoxCompleted.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val task = getItem(position)
+                        listener.onCheckBoxClick(task, checkBoxCompleted.isChecked)
+                    }
+                }
+            }
+        }
 
         // puts data into the views inside the layout
         fun bind(task: Task) {
@@ -40,6 +59,12 @@ class TasksAdapter : ListAdapter<Task, TasksAdapter.TasksViewHolder>(DiffCallbac
                 labelPriority.isVisible = task.important
             }
         }
+    }
+
+    // use interface to "decouple" fragment from adapter, so that the adapter remains reusable
+    interface OnItemClickListener {
+        fun onItemClick(task: Task)
+        fun onCheckBoxClick(task: Task, isChecked: Boolean)
     }
 
     // define how the ListAdapter can detect changes between old and new list
