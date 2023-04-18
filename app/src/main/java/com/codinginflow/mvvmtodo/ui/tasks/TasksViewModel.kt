@@ -2,10 +2,7 @@ package com.codinginflow.mvvmtodo.ui.tasks
 
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.codinginflow.mvvmtodo.data.PreferencesManager
 import com.codinginflow.mvvmtodo.data.SortOrder
 import com.codinginflow.mvvmtodo.data.Task
@@ -30,9 +27,8 @@ class TasksViewModel @ViewModelInject constructor(
     @Assisted private val state: SavedStateHandle
 ) : ViewModel() {
 
-    // 3 mutable live data for filters
-    val searchQuery = MutableStateFlow("")
 
+    val searchQuery = state.getLiveData("searchQuery", "")
 
     // by default sorted by date
     val preferencesFlow = preferencesManager.preferencesFlow
@@ -45,7 +41,7 @@ class TasksViewModel @ViewModelInject constructor(
     // whenever value of searchQuery/sortOrder/hideCompleted changes (emits a new value)
     // execute block (update in Dao) and assign to tasksFlow
     private val tasksFlow = combine(
-        searchQuery,
+        searchQuery.asFlow(),
         preferencesFlow
     // return latest values in Triple wrapper
     ) { query, preferences ->
