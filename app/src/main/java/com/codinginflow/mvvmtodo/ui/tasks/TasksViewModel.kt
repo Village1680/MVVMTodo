@@ -27,7 +27,6 @@ class TasksViewModel @ViewModelInject constructor(
     @Assisted private val state: SavedStateHandle
 ) : ViewModel() {
 
-
     val searchQuery = state.getLiveData("searchQuery", "")
 
     // by default sorted by date
@@ -62,7 +61,9 @@ class TasksViewModel @ViewModelInject constructor(
         preferencesManager.updateHideCompleted(hideCompleted)
     }
 
-    fun onTaskSelected(task: Task) {}
+    fun onTaskSelected(task: Task) = viewModelScope.launch {
+        tasksEventChannel.send(TasksEvent.NavigatetoEditTaskScreen(task))
+    }
 
     fun onTaskCheckedChanged(task: Task, isChecked: Boolean) = viewModelScope.launch {
         taskDao.update(task.copy(completed = isChecked))
@@ -77,10 +78,17 @@ class TasksViewModel @ViewModelInject constructor(
         taskDao.insert(task)
     }
 
+    // launch coroutine so we can send an event to the channel
+    fun onAddNewTaskClick() = viewModelScope.launch {
+        tasksEventChannel.send(TasksEvent.NavigateToAddTaskScreen)
+    }
+
     // represent events to send to the fragment
     // restricted class similar to enum, but allows for multiple types
     // compiler knows only the tasks defined in here, so it will give a warning if task not within sealed class
     sealed class TasksEvent {
+        object NavigateToAddTaskScreen : TasksEvent()
+        data class NavigatetoEditTaskScreen(val task: Task) : TasksEvent()
         data class ShowUndoDeleteTaskMessage(val task: Task) : TasksEvent()
     }
 }
