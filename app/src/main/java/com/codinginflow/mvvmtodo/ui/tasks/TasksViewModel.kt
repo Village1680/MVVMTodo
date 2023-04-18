@@ -1,6 +1,8 @@
 package com.codinginflow.mvvmtodo.ui.tasks
 
+import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
@@ -24,11 +26,14 @@ import kotlinx.coroutines.launch
 class TasksViewModel @ViewModelInject constructor(
     //define dependencies to inject
     private val taskDao: TaskDao,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    @Assisted private val state: SavedStateHandle
 ) : ViewModel() {
 
     // 3 mutable live data for filters
     val searchQuery = MutableStateFlow("")
+
+
     // by default sorted by date
     val preferencesFlow = preferencesManager.preferencesFlow
 
