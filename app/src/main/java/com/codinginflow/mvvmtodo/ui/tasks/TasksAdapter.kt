@@ -28,7 +28,7 @@ class TasksAdapter(private val listener: OnItemClickListener) : ListAdapter<Task
     }
 
     // knows where the views in our layouts are utilising viewbinding
-    // nested class for TasksAdapter
+    // // a nested class marked as inner can access members of the outer class (TasksAdapter)
     inner class TasksViewHolder(private val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
         init { // init block only called when viewholder is instantiated
             binding.apply {
