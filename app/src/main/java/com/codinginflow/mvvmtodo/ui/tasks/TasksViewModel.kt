@@ -8,9 +8,11 @@ import com.codinginflow.mvvmtodo.data.PreferencesManager
 import com.codinginflow.mvvmtodo.data.SortOrder
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.data.TaskDao
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 /*
@@ -29,6 +31,11 @@ class TasksViewModel @ViewModelInject constructor(
     val searchQuery = MutableStateFlow("")
     // by default sorted by date
     val preferencesFlow = preferencesManager.preferencesFlow
+
+    // as a channel, the fragment could put something into the channel
+    private val tasksEventChannel = Channel<TasksEvent>()
+    // turn into a flow, so we can consume single values out
+    val tasksEvent = tasksEventChannel.receiveAsFlow()
 
     // whenever value of searchQuery/sortOrder/hideCompleted changes (emits a new value)
     // execute block (update in Dao) and assign to tasksFlow
@@ -62,5 +69,17 @@ class TasksViewModel @ViewModelInject constructor(
 
     fun onTaskSwiped(task: Task) = viewModelScope.launch {
         taskDao.delete(task)
+        tasksEventChannel.send(TasksEvent.ShowUndoDeleteTaskMessage(task))
+    }
+
+    fun onUndoDeleteClick(task: Task) = viewModelScope.launch {
+        taskDao.insert(task)
+    }
+
+    // represent events to send to the fragment
+    // restricted class similar to enum, but allows for multiple types
+    // compiler knows only the tasks defined in here, so it will give a warning if task not within sealed class
+    sealed class TasksEvent {
+        data class ShowUndoDeleteTaskMessage(val task: Task) : TasksEvent()
     }
 }
