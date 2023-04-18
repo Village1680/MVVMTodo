@@ -96,13 +96,21 @@ class TasksViewModel @ViewModelInject constructor(
         tasksEventChannel.send(TasksEvent.ShowTaskSavedConfirmationMessage(text))
     }
 
+    fun onDeleteAllCompletedClick() = viewModelScope.launch {
+        tasksEventChannel.send(TasksEvent.NavigateToDeleteAllCompletedScreen)
+    }
+
     // represent events to send to the fragment
     // restricted class similar to enum, but allows for multiple types
     // compiler knows only the tasks defined in here, so it will give a warning if task not within sealed class
     sealed class TasksEvent {
+        // object because it takes no arguments
         object NavigateToAddTaskScreen : TasksEvent()
         data class NavigatetoEditTaskScreen(val task: Task) : TasksEvent()
         data class ShowUndoDeleteTaskMessage(val task: Task) : TasksEvent()
         data class ShowTaskSavedConfirmationMessage(val msg: String) : TasksEvent()
+        object NavigateToDeleteAllCompletedScreen : TasksEvent()
+
+
     }
 }
