@@ -11,7 +11,7 @@ import com.codinginflow.mvvmtodo.databinding.ItemTaskBinding
 
 // use ListAdapter when you have reactive data source, because it always recieves a completely new list
 // and updates the changes from the old and new list
-class TasksAdapter(private val listener: OnItemClickListener) : ListAdapter<Task, TasksAdapter.TasksViewHolder>(DiffCallback()) {
+class TasksAdapter(private val listener: OnItemClickListener) : ListAdapter<Task, TasksAdapter.TasksViewHolder>(TaskComparator()) {
 
     // creates new item in list
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TasksViewHolder {
@@ -68,7 +68,7 @@ class TasksAdapter(private val listener: OnItemClickListener) : ListAdapter<Task
     }
 
     // define how the ListAdapter can detect changes between old and new list
-    class DiffCallback : DiffUtil.ItemCallback<Task>() {
+    class TaskComparator : DiffUtil.ItemCallback<Task>() {
         // item changes position in list without changing contents
         override fun areItemsTheSame(oldItem: Task, newItem: Task) =
             // id is unique for each item, determines if same
