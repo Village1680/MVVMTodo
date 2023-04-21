@@ -119,6 +119,7 @@ class TasksFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClic
         setHasOptionsMenu(true)
     }
 
+    // interface from the adapter
     override fun onItemClick(task: Task) {
         // delegate responsibility to viewModel
         viewModel.onTaskSelected(task)
